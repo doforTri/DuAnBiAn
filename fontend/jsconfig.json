@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "baseUrl": "."
+  },
+  "include": [
+    "src/**/*"
+, "src/sections/@dashboard/general/auction/list/InvoiceTableToolbar.js"  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
