@@ -28,7 +28,7 @@ AuctionTableRow.propTypes = {
 export default function AuctionTableRow({ row, selected, onSelectRow, onViewRow, onEditRow, onDeleteRow }) {
   const theme = useTheme();
 
-  const { sent, invoiceNumber, createDate, dueDate, status, invoiceTo, totalPrice } = row;
+  const { id, product, startDate, endDate, startPrice } = row;
 
   const [openMenu, setOpenMenuActions] = useState(null);
 
@@ -47,44 +47,27 @@ export default function AuctionTableRow({ row, selected, onSelectRow, onViewRow,
       </TableCell>
 
       <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-        <Avatar alt={invoiceTo.name} color={createAvatar(invoiceTo.name).color} sx={{ mr: 2 }}>
-          {createAvatar(invoiceTo.name).name}
-        </Avatar>
+        <Avatar alt={product.name} sx={{ mr: 2 }} src={product.images[0]}/>
 
         <Stack>
           <Typography variant="subtitle2" noWrap>
-            {invoiceTo.name}
+            {product.name}
           </Typography>
 
           <Link noWrap variant="body2" onClick={onViewRow} sx={{ color: 'text.disabled', cursor: 'pointer' }}>
-            {invoiceNumber}
+            {product.category}
           </Link>
         </Stack>
       </TableCell>
 
-      <TableCell align="left">{fDate(createDate)}</TableCell>
+      <TableCell align="left">{fDate(startDate)}</TableCell>
 
-      <TableCell align="left">{fDate(dueDate)}</TableCell>
+      <TableCell align="left">{fDate(endDate)}</TableCell>
 
-      <TableCell align="center">{fCurrency(totalPrice)}</TableCell>
+      <TableCell align="center">{fCurrency(startPrice)}</TableCell>
 
       <TableCell align="center" sx={{ textTransform: 'capitalize' }}>
-        {sent}
-      </TableCell>
-
-      <TableCell align="left">
-        <Label
-          variant={theme.palette.mode === 'light' ? 'ghost' : 'filled'}
-          color={
-            (status === 'paid' && 'success') ||
-            (status === 'unpaid' && 'warning') ||
-            (status === 'overdue' && 'error') ||
-            'default'
-          }
-          sx={{ textTransform: 'capitalize' }}
-        >
-          {status}
-        </Label>
+        {product.category}
       </TableCell>
 
       <TableCell align="right">

@@ -2,6 +2,7 @@ import { combineReducers } from 'redux';
 import { persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 // slices
+import autionReducer from "./slices/auctions";
 import mailReducer from './slices/mail';
 import chatReducer from './slices/chat';
 import productReducer from './slices/product';
@@ -25,6 +26,7 @@ const productPersistConfig = {
 };
 
 const rootReducer = combineReducers({
+  auction: autionReducer,
   mail: mailReducer,
   chat: chatReducer,
   calendar: calendarReducer,

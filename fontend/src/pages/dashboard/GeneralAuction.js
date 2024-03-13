@@ -1,5 +1,6 @@
 import sumBy from 'lodash/sumBy';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 // @mui
 import { useTheme } from '@mui/material/styles';
@@ -21,6 +22,9 @@ import {
   TablePagination,
   FormControlLabel,
 } from '@mui/material';
+// redux
+import { useSelector, useDispatch } from 'react-redux';
+import { getAuctions } from '../../redux/slices/auctions';
 // routes
 import { PATH_DASHBOARD } from '../../routes/paths';
 // hooks
@@ -40,6 +44,8 @@ import { TableEmptyRows, TableHeadCustom, TableNoData, TableSelectedActions } fr
 import InvoiceAnalytic from '../../sections/@dashboard/invoice/InvoiceAnalytic';
 import {AuctionTableRow, AuctionTableToolbar } from '../../sections/@dashboard/general/auction';
 
+
+
 // ----------------------------------------------------------------------
 
 const SERVICE_OPTIONS = [
@@ -52,11 +58,11 @@ const SERVICE_OPTIONS = [
 ];
 
 const TABLE_HEAD = [
-  { id: 'invoiceNumber', label: 'Client', align: 'left' },
+  { id: 'product', label: 'Product', align: 'left' },
   { id: 'createDate', label: 'Create', align: 'left' },
   { id: 'dueDate', label: 'Due', align: 'left' },
-  { id: 'price', label: 'Amount', align: 'center', width: 140 },
-  { id: 'sent', label: 'Sent', align: 'center', width: 140 },
+  { id: 'price', label: 'Price', align: 'center', width: 140 },
+  { id: 'category', label: 'Category', align: 'center', width: 140 },
   { id: 'status', label: 'Status', align: 'left' },
   { id: '' },
 ];
@@ -89,7 +95,15 @@ export default function Auction() {
     onChangeRowsPerPage,
   } = useTable({ defaultOrderBy: 'createDate' });
 
-  const [tableData, setTableData] = useState(_invoices);
+  //
+  const dispatch = useDispatch();
+
+  const {auctions, isLoading} = useSelector((state) => state.auction);
+
+  console.log(auctions)
+
+
+  const [tableData, setTableData] = useState([]);
 
   const [filterName, setFilterName] = useState('');
 
@@ -100,6 +114,19 @@ export default function Auction() {
   const [filterEndDate, setFilterEndDate] = useState(null);
 
   const { currentTab: filterStatus, onChangeTab: onFilterStatus } = useTabs('all');
+
+    useEffect(() => {
+    // Gọi action để load danh sách phiên đấu giá khi component được render
+    dispatch(getAuctions());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if(auctions.length) {
+      setTableData(auctions);
+    }
+  }, [auctions])
+
+  console.log(tableData)
 
   const handleFilterName = (filterName) => {
     setFilterName(filterName);
@@ -378,28 +405,29 @@ function applySortFilter({
 
   tableData = stabilizedThis.map((el) => el[0]);
 
-  if (filterName) {
-    tableData = tableData.filter(
-      (item) =>
-        item.invoiceNumber.toLowerCase().indexOf(filterName.toLowerCase()) !== -1 ||
-        item.invoiceTo.name.toLowerCase().indexOf(filterName.toLowerCase()) !== -1
-    );
-  }
+  // filter
+  // if (filterName) {
+  //   tableData = tableData.filter(
+  //     (item) =>
+  //       item.invoiceNumber.toLowerCase().indexOf(filterName.toLowerCase()) !== -1 ||
+  //       item.invoiceTo.name.toLowerCase().indexOf(filterName.toLowerCase()) !== -1
+  //   );
+  // }
 
-  if (filterStatus !== 'all') {
-    tableData = tableData.filter((item) => item.status === filterStatus);
-  }
+  // if (filterStatus !== 'all') {
+  //   tableData = tableData.filter((item) => item.status === filterStatus);
+  // }
 
-  if (filterService !== 'all') {
-    tableData = tableData.filter((item) => item.items.some((c) => c.service === filterService));
-  }
+  // if (filterService !== 'all') {
+  //   tableData = tableData.filter((item) => item.items.some((c) => c.service === filterService));
+  // }
 
-  if (filterStartDate && filterEndDate) {
-    tableData = tableData.filter(
-      (item) =>
-        item.createDate.getTime() >= filterStartDate.getTime() && item.createDate.getTime() <= filterEndDate.getTime()
-    );
-  }
+  // if (filterStartDate && filterEndDate) {
+  //   tableData = tableData.filter(
+  //     (item) =>
+  //       item.createDate.getTime() >= filterStartDate.getTime() && item.createDate.getTime() <= filterEndDate.getTime()
+  //   );
+  // }
 
   return tableData;
 }

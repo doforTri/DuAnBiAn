@@ -1,8 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
 import sum from 'lodash/sum';
 import uniqBy from 'lodash/uniqBy';
-import axios from '../../utils/axios';
 import { put, takeLatest, all } from 'redux-saga/effects';
+import axios from '../../utils/axios';
+import { dispatch } from '../store';
 
 const initialState = {
   auctions: [],
@@ -28,7 +29,7 @@ const auctionSlice = createSlice({
       state.error = action.payload;
     },
 
-    //Get auction by id
+    // Get auction by id
     getAuction: (state, action) => {
       state.auction = null;
       state.isLoading = true;
@@ -72,6 +73,10 @@ const auctionSlice = createSlice({
   },
 });
 
+
+// Reducer
+export default auctionSlice.reducer;
+
 // Action creators
 export const {
   loadAuctions,
@@ -89,38 +94,63 @@ export const {
 // Selectors
 export const selectAuctions = (state) => state.auction.auctions;
 
-// Sagas
-function* loadAuctionsAPI() {
-  try {
-    const response = yield axios.get('/auctions');
-    yield put(loadAuctionsSuccess(response.data));
-  } catch (error) {
-    yield put(loadAuctionsFailure(error));
-  }
+
+// ------------------------------------
+export function getAuctions() {
+  return async () => {
+    dispatch(auctionSlice.actions.loadAuctions());
+    try {
+      const response = await axios.post('http://47.129.6.242/auction/search', {
+                keyword: "",
+                currentPage: 0,
+                size: 100,
+                sortedField: ""
+});
+      console.log(response.data.data.contents)
+      dispatch(auctionSlice.actions.loadAuctionsSuccess(response.data.data.contents));
+    } catch (error) {
+      dispatch(auctionSlice.actions.loadAuctionsFailure(error));
+    }
+  };
 }
 
-function* getAuctionsSuccessAPI(action) {
-  try {
-    const response = yield axios.get('/auctions/name', {
-      params: { name: action.payload },
-    });
-    yield put(getAuctionsSuccess(response.data.data));
-  } catch (error) {
-    console.error(error);
-    yield put(loadAuctionsFailure(error));
-  }
-}
+// // Sagas
+// // API get all auction
+// function* loadAuctionsAPI() {
+//   try {
+//     const response = yield axios.post('http://47.129.6.242/auction/search', {
+//                 keyword: "",
+//                 currentPage: 0,
+//                 size: 100,
+//                 sortedField: ""
+// });
+//     yield put(loadAuctionsSuccess(response.data));
+//   } catch (error) {
+//     yield put(loadAuctionsFailure(error));
+//   }
+// }
 
-function* watchLoadAuctions() {
-  yield takeLatest(loadAuctions.type, loadAuctionsAPI);
-}
+// function* getAuctionsSuccessAPI(action) {
+//   try {
+//     const response = yield axios.get('/auctions/name', {
+//       params: { name: action.payload },
+//     });
+//     yield put(getAuctionsSuccess(response.data.data));
+//   } catch (error) {
+//     console.error(error);
+//     yield put(loadAuctionsFailure(error));
+//   }
+// }
 
-function* watchGetAuctionsSuccess() {
-  yield takeLatest(getAuctionsSuccess.type, getAuctionsSuccessAPI);
-}
+// function* watchLoadAuctions() {
+//   yield takeLatest(loadAuctions.type, loadAuctionsAPI);
+// }
 
-export default function* rootSaga() {
-  yield all([watchLoadAuctions(), watchGetAuctionsSuccess()]);
-}
+// function* watchGetAuctionsSuccess() {
+//   yield takeLatest(getAuctionsSuccess.type, getAuctionsSuccessAPI);
+// }
 
-export default auctionSlice.reducer;
+// export function* rootSaga() {
+//   yield all([watchLoadAuctions(), watchGetAuctionsSuccess()]);
+// }
+
